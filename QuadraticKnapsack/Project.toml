@@ -1,0 +1,7 @@
+name = "QuadraticKnapsack"
+uuid = "b9e79ec6-4db9-4008-adc0-7db78d24770c"
+authors = ["atEchoOff <at.echo.off@outlook.com>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
