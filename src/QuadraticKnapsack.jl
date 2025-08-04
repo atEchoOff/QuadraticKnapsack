@@ -3,7 +3,7 @@ module QuadraticKnapsack
 export QuadraticKnapsackMinimizer
 export QuadraticKnapsackStats
 
-using LinearAlgebra # just for dot
+using LinearAlgebra: dot, norm
 
 """
     QuadraticKnapsackMinimizer{Type}(buffer[, tol = 100 * eps()])
