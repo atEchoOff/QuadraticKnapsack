@@ -1,4 +1,4 @@
-# QuadraticKnapsack
+# QuadraticKnapsack.jl
 
 This package provides a tool to efficiently solve the continuous quadratic knapsack problem:
 $$\min_{\begin{matrix}a^T x \geq b\\ 0 \leq x \leq u\end{matrix}} x^T \text{diag}(w) x$$
