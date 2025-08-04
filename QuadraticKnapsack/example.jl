@@ -94,7 +94,7 @@ println(repeat("-", 50))
 @assert all(0. .<= x .<= upper_bounds)
 
 # Finally, lets make a huge problem
-PROBLEM_SIZE = 100000
+PROBLEM_SIZE = 1000000
 println("Running and benchmarking with problem size $PROBLEM_SIZE")
 minimizer! = QuadraticKnapsackMinimizer{Float64}(zeros(Float64, PROBLEM_SIZE))
 x = zeros(Float64, PROBLEM_SIZE)

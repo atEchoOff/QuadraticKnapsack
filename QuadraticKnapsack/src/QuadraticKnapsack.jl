@@ -7,7 +7,7 @@ using LinearAlgebra # just for dot
 """
     QuadraticKnapsackMinimizer{Type}(buffer[, tol = 100 * eps()])
 
-A continuous quadratic knapsack problem solver of eltype `Type`. Given internal `buffer` whose size is larger than that of the knapsack problem dimension. Given optional tolerance `tol` to stop iteration (default `100 * eps()`).
+A continuous quadratic knapsack problem solver of eltype `Type`. Given internal `buffer` whose size is the knapsack problem dimension. Given optional tolerance `tol` to stop iteration (default `100 * eps()`).
 """
 struct QuadraticKnapsackMinimizer{Ttol}
     tol::Ttol
@@ -19,12 +19,6 @@ struct QuadraticKnapsackMinimizer{Ttol}
     end
 end
 
-# Override indexing floats, makes code for QKL simpler
-import Base.getindex
-function Base.getindex(x::Float64, i::Int64)
-    return x
-end
-
 """
     minimizer(x, a, b[, upper_bounds=1., w=1., tol=100 * eps(), maxit=200])
 
@@ -34,7 +28,7 @@ Output returned in `x`. Given vector `a` and scalar `b`. Elementwise upper bound
 
 Note that 200 is a very loose upper bound. 
 """
-function (s::QuadraticKnapsackMinimizer{Ttol})(x::Vector{Ttol}, a::Vector{Ttol}, b::Ttol; upper_bounds=one(Ttol), w=one(Ttol), maxit=200) where {Ttol}
+function (s::QuadraticKnapsackMinimizer{Ttol})(x::Vector{Ttol}, a::Vector{Ttol}, b::Ttol; upper_bounds=ones(Ttol, length(s.a_over_w))::Vector{Ttol}, w=ones(Ttol, length(s.a_over_w))::Vector{Ttol}, maxit=200::Int64) where {Ttol}
     # Use local knapsack memory
     a_over_w = @view s.a_over_w[1:length(a)]
 
