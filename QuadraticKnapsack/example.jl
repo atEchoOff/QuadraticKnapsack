@@ -93,8 +93,16 @@ println(repeat("-", 50))
 @assert abs(dot(a, x) - b) < 100 * eps()
 @assert all(0. .<= x .<= upper_bounds)
 
+# Here we do the same problem again, but we also enter a stats object to get the itercount
+stats = QuadraticKnapsackStats()
+minimizer!(x, a, b; upper_bounds=upper_bounds, w=w, stats=stats)
+
+println("The solver took $(stats.itercount) iterations")
+println("Problem infeasibility: $(stats.infeasible)")
+
 # Finally, lets make a huge problem
-PROBLEM_SIZE = 1000000
+println(repeat("-", 50))
+PROBLEM_SIZE = 100000
 println("Running and benchmarking with problem size $PROBLEM_SIZE")
 minimizer! = QuadraticKnapsackMinimizer{Float64}(zeros(Float64, PROBLEM_SIZE))
 x = zeros(Float64, PROBLEM_SIZE)
@@ -103,7 +111,9 @@ a = rand(PROBLEM_SIZE)
 w = rand(PROBLEM_SIZE)
 b = dot(a, upper_bounds) / 2 # ensure feasibility
 
-minimizer!(x, a, b; upper_bounds=upper_bounds, w=w)
+minimizer!(x, a, b; upper_bounds=upper_bounds, w=w, stats=stats)
+
+println("The solver took $(stats.itercount) iterations")
 
 @assert abs(dot(a, x) - b) < 1e-10 # a bit of leeway for a larger problem
 @assert all(0. .<= x .<= upper_bounds)

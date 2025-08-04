@@ -1,6 +1,7 @@
 module QuadraticKnapsack
 
 export QuadraticKnapsackMinimizer
+export QuadraticKnapsackStats
 
 using LinearAlgebra # just for dot
 
@@ -19,22 +20,40 @@ struct QuadraticKnapsackMinimizer{Ttol}
     end
 end
 
+mutable struct QuadraticKnapsackStats
+    infeasible::Bool
+    itercount::Int64
+
+    function QuadraticKnapsackStats()
+        return new(false, 0)
+    end
+end
+
 """
-    minimizer(x, a, b[, upper_bounds=1., w=1., tol=100 * eps(), maxit=200])
+    minimizer(x, a, b[, upper_bounds=ones(Ttol, length(buffer)), w=ones(Ttol, length(buffer)), tol=100 * eps(), maxit=200, stats=nothing])
 
 Solve the continuous quadratic knapsack problem: min x^T diag(w) x subject to a^T x >= b and 0 <= x <= upper_bounds.
 
 Output returned in `x`. Given vector `a` and scalar `b`. Elementwise upper bounds on `x` are `upper_bounds`, defaulted to one. Objective function weights given by `w`, defaulted to one. Maximum number of iterations set to `maxit`, defaulted to 200. 
 
+If given stats::QuadraticKnapsackStats, it will contain infeasible::Bool for whether or not the problem is infeasible, and itercount::Int64, for the total number of iterations taken.
+
+In the event of infeasibility, the "best possible" (though infeasible) solution is returned.
+
 Note that 200 is a very loose upper bound. 
 """
-function (s::QuadraticKnapsackMinimizer{Ttol})(x::Vector{Ttol}, a::Vector{Ttol}, b::Ttol; upper_bounds=ones(Ttol, length(s.a_over_w))::Vector{Ttol}, w=ones(Ttol, length(s.a_over_w))::Vector{Ttol}, maxit=200::Int64) where {Ttol}
+function (s::QuadraticKnapsackMinimizer{Ttol})(x::Vector{Ttol}, a::Vector{Ttol}, b::Ttol; upper_bounds=ones(Ttol, length(s.a_over_w))::Vector{Ttol}, w=ones(Ttol, length(s.a_over_w))::Vector{Ttol}, maxit=200::Int64, stats=nothing::Union{Nothing, QuadraticKnapsackStats}) where {Ttol}
     # Use local knapsack memory
     a_over_w = @view s.a_over_w[1:length(a)]
 
     if b <= 0.0
         # x = 0 is the optimal solution for the minimization
         fill!(x, zero(eltype(x)))
+
+        if !isnothing(stats)
+            stats.infeasible = false
+            stats.itercount = 0
+        end
         return x
     end
 
@@ -51,14 +70,19 @@ function (s::QuadraticKnapsackMinimizer{Ttol})(x::Vector{Ttol}, a::Vector{Ttol},
     end
 
     if worst_possible < b
-        # FIXME keep infeas check?
+        # Infeasibility detected, return "best possible" (infeasible) solution.
         x .= upper_bounds .* (a .> 0)
+
+        if !isnothing(stats)
+            stats.infeasible = true
+            stats.itercount = 0
+        end
         return x
     end
 
     # Start the Newton iteration
     lambdak = zero(eltype(a))
-    itercount = 0 # for sanity check
+    itercount = 1
     
     for _ in range(0, maxit)
         # Clip current solution within feasible domain
@@ -85,9 +109,9 @@ function (s::QuadraticKnapsackMinimizer{Ttol})(x::Vector{Ttol}, a::Vector{Ttol},
         itercount += 1 # for sanity check
     end
 
-    # FIXME report itercount?
-    if itercount > 6
-        println("The itercount was $itercount")
+    if !isnothing(stats)
+        stats.infeasible = false
+        stats.itercount = itercount
     end
 
     return x
