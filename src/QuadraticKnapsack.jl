@@ -82,7 +82,7 @@ function (s::QuadraticKnapsackMinimizer{Ttol})(x::Vector{Ttol}, a::Vector{Ttol},
 
     # Start the Newton iteration
     lambdak = zero(eltype(a))
-    itercount = 1
+    itercount = 0
     
     for _ in range(0, maxit)
         # Clip current solution within feasible domain
